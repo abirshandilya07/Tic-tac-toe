@@ -1,0 +1,365 @@
+<html>
+<head>
+    <title>
+        Tic Tac Toe
+    </title>
+    <link rel='icon' href='favicon.ico' type='image/x-icon' />
+    <style>
+        .tictactoe {
+            border: 1px solid black;
+            background-color: white;
+            height: 100px;
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 40px;
+            font-family: "Arial";
+        }
+
+        #info {
+            background-color: #1e1f1c;
+            margin: 21px;
+            display: inline-block;
+            width: 300px;
+            height: 270px;
+            padding: 12px;
+            border: 5px white solid;
+            text-align: justify;
+        }
+
+        .x {
+            color: red;
+        }
+
+        .o {
+            color: green;
+        }
+
+        .class {
+            background-color: black;
+            height: 2px;
+            width: 350px;
+        }
+    </style>
+    <script>
+        var board = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
+        var i = 0;
+        var game_over = false;
+        var player1 = "";
+        var player2 = "";
+
+        function shuffle(a) {
+            var j, x, k;
+            for (k = a.length - 1; k > 0; k--) {
+                j = Math.floor(Math.random() * (k + 1));
+                x = a[k];
+                a[k] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+
+        function print_x_o(cell_id) {
+            var e = document.getElementById("td_" + cell_id);
+
+            if (game_over == false && e.innerHTML != "O" && e.innerHTML != "X") {
+                var td_no = cell_id - 1;
+                i = i + 1;
+                if (i % 2 != 0) {
+                    board[td_no] = "X";
+                    e.innerHTML = "X";
+                    e.classList.add("x");
+                    if (is_win("X")) {
+                        game_over = true;
+                        document.getElementById("result").innerHTML = player1 + " (X) won. Game Over.";
+                    }
+                }
+                else {
+                    board[td_no] = "O";
+                    e.innerHTML = "O";
+                    e.classList.add("o");
+                    if (is_win("O")) {
+                        game_over = true;
+                        document.getElementById("result").innerHTML = player2 + " (O) won. Game Over.";
+                    }
+                }
+            }
+
+            if (game_over == false) {
+                for (var k = 0; k < 9; k++)
+                    if (board[k] == " ") {
+                        game_over = false;
+                        break;
+                    }
+                    else
+                        game_over = true;
+
+                if (game_over == true)
+                    document.getElementById("result").innerHTML = "It's a tie, no one won. Game Over.";
+            }
+
+            if (game_over == false && player1 == "Computer" && (i % 2) == 0)
+                print_x_o(next_move("X") + 1);
+            else if (game_over == false && player2 == "Computer" && (i % 2) != 0)
+                print_x_o(next_move("O") + 1);
+
+            return false;
+        }
+
+        function next_move(x_o) {
+            var move_made = false;
+
+            //priority 1: can we win
+
+            if (move_made == false) {
+                for (var c = 0; c < 9; c++) {
+                    if (board[c] != "X" && board[c] != "O") //empty check
+                    {
+                        board[c] = x_o;
+                        if (check_win(x_o)) {
+                            move_made = true; //we won
+                            board[c] = " ";//revert move
+                            return c;
+                        }
+                        else
+                            board[c] = " ";//revert move
+                    }
+                }
+            }
+            //priority 2: can we block
+
+            if (move_made == false) {
+                var opp_x_o = "";
+                if (x_o == "X")
+                    opp_x_o = "O";
+                else
+                    opp_x_o = "X";
+
+                for (var c = 0; c < 9; c++) {
+                    if (board[c] != "X" && board[c] != "O") { //empty check
+                        board[c] = opp_x_o
+                        if (check_win(opp_x_o)) {
+                            move_made = true //we blocked successfully
+                            board[c] = " ";
+                            return c;
+                        }
+                        else
+                            board[c] = " ";//revert move
+                    }
+                }
+            }
+            //priority 3: is center empty
+            if (move_made == false) {
+                if (board[4] != "X" && board[4] != "O") { //empty check
+                    move_made = true; //Placed at center successfully
+                    return 4;
+                }
+            }
+            //priority 4: is any corner empty
+            if (move_made == false) {
+                var arr = shuffle([0, 2, 6, 8]);
+                for (var c = 0; c < 4; c++) {
+                    if (board[arr[c]] != "X" && board[arr[c]] != "O") { //empty check
+                        move_made = true; //Placed at corner successfully
+                        return parseInt(arr[c]);
+                    }
+                }
+            }
+            //priority 5: is any edge empty
+            if (move_made == false) {
+                var arr = shuffle([1, 3, 5, 7]);
+                for (var c = 0; c < 4; c++) {
+                    if (board[arr[c]] != "X" && board[arr[c]] != "O") { //empty check
+                        move_made = true; //Placed at edge successfully
+                        return parseInt(arr[c]);
+                    }
+                }
+            }
+        }
+
+        function check_win(x_o) {
+            if (board[0] == x_o && board[1] == x_o && board[2] == x_o) {
+                return true;
+            }
+            else if (board[3] == x_o && board[4] == x_o && board[5] == x_o) {
+                return true;
+            }
+            else if (board[6] == x_o && board[7] == x_o && board[8] == x_o) {
+                return true;
+            }
+            else if (board[0] == x_o && board[3] == x_o && board[6] == x_o) {
+                return true;
+            }
+            else if (board[1] == x_o && board[4] == x_o && board[7] == x_o) {
+                return true;
+            }
+            else if (board[2] == x_o && board[5] == x_o && board[8] == x_o) {
+                return true;
+            }
+            else if (board[0] == x_o && board[4] == x_o && board[8] == x_o) {
+                return true;
+            }
+            else if (board[2] == x_o && board[4] == x_o && board[6] == x_o) {
+                return true;
+            }
+            else
+                return false;
+        }
+
+
+
+        function is_win(x_o) {
+            if (board[0] == x_o && board[1] == x_o && board[2] == x_o) {
+                document.getElementById("hor_line").style.display = "block";
+                document.getElementById("hor_line").style.position = "absolute";
+                document.getElementById("hor_line").style.left = "30px";
+                document.getElementById("hor_line").style.top = "338px";
+                return true;
+            }
+            else if (board[3] == x_o && board[4] == x_o && board[5] == x_o) {
+                document.getElementById("hor_line").style.display = "block";
+                document.getElementById("hor_line").style.position = "absolute";
+                document.getElementById("hor_line").style.left = "30px";
+                document.getElementById("hor_line").style.top = "440px";
+                return true;
+            }
+            else if (board[6] == x_o && board[7] == x_o && board[8] == x_o) {
+                document.getElementById("hor_line").style.display = "block";
+                document.getElementById("hor_line").style.position = "absolute";
+                document.getElementById("hor_line").style.left = "30px";
+                document.getElementById("hor_line").style.top = "543px";
+                return true;
+            }
+            else if (board[0] == x_o && board[3] == x_o && board[6] == x_o) {
+                document.getElementById("ver_line").style.display = "block";
+                document.getElementById("ver_line").style.position = "absolute";
+                document.getElementById("ver_line").style.left = "58px";
+                document.getElementById("ver_line").style.top = "313px";
+                return true;
+            }
+            else if (board[1] == x_o && board[4] == x_o && board[7] == x_o) {
+                document.getElementById("ver_line").style.display = "block";
+                document.getElementById("ver_line").style.position = "absolute";
+                document.getElementById("ver_line").style.left = "164px";
+                document.getElementById("ver_line").style.top = "313px";
+                return true;
+            }
+            else if (board[2] == x_o && board[5] == x_o && board[8] == x_o) {
+                document.getElementById("ver_line").style.display = "block";
+                document.getElementById("ver_line").style.position = "absolute";
+                document.getElementById("ver_line").style.left = "270px";
+                document.getElementById("ver_line").style.top = "313px";
+                return true;
+            }
+            else if (board[0] == x_o && board[4] == x_o && board[8] == x_o) {
+                document.getElementById("diag1").style.display = "block";
+                document.getElementById("diag1").style.position = "absolute";
+                document.getElementById("diag1").style.left = "10px";
+                document.getElementById("diag1").style.top = "294px";
+                return true;
+            }
+            else if (board[2] == x_o && board[4] == x_o && board[6] == x_o) {
+                document.getElementById("diag2").style.display = "block";
+                document.getElementById("diag2").style.position = "absolute";
+                document.getElementById("diag2").style.left = "10px";
+                document.getElementById("diag2").style.top = "294px";
+                return true;
+            }
+            else
+                return false;
+        }
+        function reset_form() {
+            location.reload();
+            return false;
+        }
+        function start() {
+            player1 = document.getElementById("txtPlayer1").value
+            player2 = document.getElementById("txtPlayer2").value
+            if (player1 == "" && player2 == "") {
+                alert("Enter atleast name of 1 player to continue");
+                return false;
+            }
+            else if (player1 == "")
+                player1 = "Computer";
+            else if (player2 == "")
+                player2 = "Computer";
+
+            document.getElementById("div_board").style.visibility = "visible";
+            document.getElementById('txtPlayer1').readOnly = true;
+            document.getElementById('txtPlayer2').readOnly = true;
+
+            if (player1 == "Computer")
+                print_x_o(next_move("X") + 1);
+
+            return false;
+        }
+    </script>
+</head>
+<body style="background :url('tictactoe.png'); color:white;">
+    <div id="header">
+        <div style="height:124px; width:124px; border:10px red solid; float:left; display:inline-block; border-radius:50%;">
+            <img src="logo.png" style="height:124px" />
+        </div>
+        <div style="font-family:Algerian; font-weight:bold; font-size: 50px; margin-left:10px; display:inline-block;font-variant: small-caps;">
+            <p>Abir Shandilya</p>
+        </div>
+    </div>
+    <div id="div_names">
+        <table style="background-color:#1e1f1c;">
+            <tr>
+                <td>Enter the name of 1st Player (X) :</td>
+                <td><input id="txtPlayer1" type="text" /></td>
+                <td>or leave blank to play with computer as Player 1</td>
+            </tr>
+            <tr>
+                <td>Enter the name of 2nd Player (O) :</td>
+                <td><input id="txtPlayer2" type="text" /></td>
+                <td>or leave blank to play with computer as Player 2</td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <button onclick="start()" style="height:50px; width:100px; background-color:green; color:white; font-weight:bold;" >Start</button>
+        <button onclick="reset_form()" style="height:50px; width:100px; background-color:cornflowerblue; color:white;font-weight:bold;" >Reset</button>
+    </div>
+    <div id="div_board" style="visibility: hidden;float:left">
+        <img id="hor_line" src="hor_line.png" style="display:none" />
+        <img id="ver_line" src="ver_line.png" style="display:none" />
+        <img id="diag1" src="diag1.png" style="display:none" />
+        <img id="diag2" src="diag2.png" style="display:none" />
+        <table>
+            <caption>Tic Tac Toe</caption>
+            <tr>
+                <td id="td_1" onclick="print_x_o(1)" class="tictactoe"></td>
+                <td id="td_2" onclick="print_x_o(2)" class="tictactoe"></td>
+                <td id="td_3" onclick="print_x_o(3)" class="tictactoe"></td>
+            </tr>
+            <tr>
+                <td id="td_4" onclick="print_x_o(4)" class="tictactoe"></td>
+                <td id="td_5" onclick="print_x_o(5)" class="tictactoe"></td>
+                <td id="td_6" onclick="print_x_o(6)" class="tictactoe"></td>
+            </tr>
+            <tr>
+                <td id="td_7" onclick="print_x_o(7)" class="tictactoe"></td>
+                <td id="td_8" onclick="print_x_o(8)" class="tictactoe"></td>
+                <td id="td_9" onclick="print_x_o(9)" class="tictactoe"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="info">
+        <img style="height: 62px; float: left;" src="logo.jpg" />
+        <h1 style="margin-left: 20px; display: inline-block;">Tic Tac Toe</h1>
+        <hr />
+        <p>Tic-tac-toe (American English), noughts and crosses (British English), 
+        or Xs and Os is a game for two players, 
+        X and O, who take turns marking the spaces in a 3×3 grid. 
+        The player who succeeds in placing three of their marks in a horizontal, vertical,
+        or diagonal row is the winner.</p>
+    </div>
+    <div>
+        <span id="result" style="font-size:20px;background-color:#1e1f1c;">
+
+        </span>
+    </div>
+</body>
+</html>
